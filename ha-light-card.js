@@ -79,69 +79,100 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-(function () {
-    var _classDecorators = [customElement('ha-light-card')];
-    var _classDescriptor;
-    var _classExtraInitializers = [];
-    var _classThis;
-    var _classSuper = LitElement;
-    var _hass_decorators;
-    var _hass_initializers = [];
-    var _hass_extraInitializers = [];
-    var _config_decorators;
-    var _config_initializers = [];
-    var _config_extraInitializers = [];
-    _classThis = /** @class */ (function (_super) {
-        __extends(HaLightCard_1, _super);
-        function HaLightCard_1() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this.hass = __runInitializers(_this, _hass_initializers, void 0);
-            _this.config = (__runInitializers(_this, _hass_extraInitializers), __runInitializers(_this, _config_initializers, void 0));
-            __runInitializers(_this, _config_extraInitializers);
-            return _this;
+if (!customElements.get('ha-light-card')) {
+  customElements.define('ha-light-card', class HaLightCard extends LitElement {
+    static get properties() {
+      return {
+        hass: { type: Object },
+        config: { type: Object }
+      };
+    }
+
+    setConfig(config) {
+      if (!config.entity) {
+        throw new Error('You need to define an entity');
+      }
+      this.config = config;
+    }
+
+    render() {
+      if (!this.hass || !this.config) {
+        return html``;
+      }
+
+      const stateObj = this.hass.states[this.config.entity];
+      if (!stateObj) {
+        return html`
+          <ha-card>
+            <div class="card">
+              Entity not found: ${this.config.entity}
+            </div>
+          </ha-card>
+        `;
+      }
+
+      const isOn = stateObj.state === 'on';
+      const brightness = stateObj.attributes.brightness || 0;
+      const brightnessPercentage = (brightness / 255) * 100;
+
+      return html`
+        <ha-card>
+          <div class="card" @click=${this._toggleLight}>
+            <div class="brightness-bar" style="height: ${brightnessPercentage}%"></div>
+            <div class="content">
+              <div>
+                <div class="name">${stateObj.attributes.friendly_name || this.config.entity}</div>
+                <div class="state">${isOn ? 'ON' : 'OFF'}</div>
+              </div>
+              <ha-icon
+                class="icon"
+                icon=${isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline'}
+              ></ha-icon>
+            </div>
+          </div>
+        </ha-card>
+      `;
+    }
+
+    _toggleLight() {
+      this.hass.callService('light', 'toggle', {
+        entity_id: this.config.entity,
+      });
+    }
+
+    static get styles() {
+      return css`
+        :host {
+          display: block;
         }
-        HaLightCard_1.prototype.setConfig = function (config) {
-            if (!config.entity) {
-                throw new Error('You need to define an entity');
-            }
-            this.config = config;
-        };
-        HaLightCard_1.prototype.render = function () {
-            if (!this.hass || !this.config) {
-                return html(templateObject_1 || (templateObject_1 = __makeTemplateObject([""], [""])));
-            }
-            var stateObj = this.hass.states[this.config.entity];
-            if (!stateObj) {
-                return html(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        <ha-card>\n          <div class=\"card\">\n            Entity not found: ", "\n          </div>\n        </ha-card>\n      "], ["\n        <ha-card>\n          <div class=\"card\">\n            Entity not found: ", "\n          </div>\n        </ha-card>\n      "])), this.config.entity);
-            }
-            var isOn = stateObj.state === 'on';
-            var brightness = stateObj.attributes.brightness || 0;
-            var brightnessPercentage = (brightness / 255) * 100;
-            return html(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n      <ha-card>\n        <div class=\"card\" @click=", ">\n          <div class=\"brightness-bar\" style=\"height: ", "%\"></div>\n          <div class=\"content\">\n            <div>\n              <div class=\"name\">", "</div>\n              <div class=\"state\">", "</div>\n            </div>\n            <ha-icon\n              class=\"icon\"\n              icon=", "\n            ></ha-icon>\n          </div>\n        </div>\n      </ha-card>\n    "], ["\n      <ha-card>\n        <div class=\"card\" @click=", ">\n          <div class=\"brightness-bar\" style=\"height: ", "%\"></div>\n          <div class=\"content\">\n            <div>\n              <div class=\"name\">", "</div>\n              <div class=\"state\">", "</div>\n            </div>\n            <ha-icon\n              class=\"icon\"\n              icon=", "\n            ></ha-icon>\n          </div>\n        </div>\n      </ha-card>\n    "])), this._toggleLight, brightnessPercentage, stateObj.attributes.friendly_name || this.config.entity, isOn ? 'ON' : 'OFF', isOn ? 'mdi:lightbulb' : 'mdi:lightbulb-outline');
-        };
-        HaLightCard_1.prototype._toggleLight = function () {
-            this.hass.callService('light', 'toggle', {
-                entity_id: this.config.entity,
-            });
-        };
-        return HaLightCard_1;
-    }(_classSuper));
-    __setFunctionName(_classThis, "HaLightCard");
-    (function () {
-        var _a;
-        var _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
-        _hass_decorators = [property({ type: Object })];
-        _config_decorators = [property({ type: Object })];
-        __esDecorate(null, null, _hass_decorators, { kind: "field", name: "hass", static: false, private: false, access: { has: function (obj) { return "hass" in obj; }, get: function (obj) { return obj.hass; }, set: function (obj, value) { obj.hass = value; } }, metadata: _metadata }, _hass_initializers, _hass_extraInitializers);
-        __esDecorate(null, null, _config_decorators, { kind: "field", name: "config", static: false, private: false, access: { has: function (obj) { return "config" in obj; }, get: function (obj) { return obj.config; }, set: function (obj, value) { obj.config = value; } }, metadata: _metadata }, _config_initializers, _config_extraInitializers);
-        __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
-        _classThis = _classDescriptor.value;
-        if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
-    })();
-    _classThis.styles = css(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n    :host {\n      display: block;\n    }\n    .card {\n      padding: 16px;\n      display: flex;\n      flex-direction: column;\n      cursor: pointer;\n    }\n    .brightness-bar {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      width: 100%;\n      background-color: var(--primary-color, #fdd835);\n      transition: height 0.3s ease-in-out;\n    }\n    .content {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      z-index: 1;\n    }\n    .icon {\n      --mdc-icon-size: 24px;\n      margin-left: 8px;\n    }\n  "], ["\n    :host {\n      display: block;\n    }\n    .card {\n      padding: 16px;\n      display: flex;\n      flex-direction: column;\n      cursor: pointer;\n    }\n    .brightness-bar {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      width: 100%;\n      background-color: var(--primary-color, #fdd835);\n      transition: height 0.3s ease-in-out;\n    }\n    .content {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      z-index: 1;\n    }\n    .icon {\n      --mdc-icon-size: 24px;\n      margin-left: 8px;\n    }\n  "])));
-    (function () {
-        __runInitializers(_classThis, _classExtraInitializers);
-    })();
-    return _classThis;
-})();
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4;
+        .card {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+        }
+        .brightness-bar {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: var(--primary-color, #fdd835);
+          opacity: 0.3;
+          transition: height 0.3s ease-in-out;
+        }
+        .content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          z-index: 1;
+        }
+        .icon {
+          --mdc-icon-size: 24px;
+          margin-left: 8px;
+        }
+      `;
+    }
+  });
+}
